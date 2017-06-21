@@ -1,10 +1,16 @@
 package Main;
 
+import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.util.SimpleTimeZone;
 
 public class Main {
-    protected static final Scanner scanner = new Scanner(System.in);
+    enum TYPE_DIAG {
+        HORZ,
+        VERT,
+        DIAG
+    }
+    protected static Scanner scanner = new Scanner(System.in);
     protected static final char DOT = '•';
     protected static final char X = 'X';
     protected static final char O = 'O';
@@ -12,16 +18,18 @@ public class Main {
 
     public static void main(String...args) {
         char[][] map = initGame();
-        printField(map);
-//        do {
-//            nextTurn(X, map);
-//        } while (winCondition());
+//        while (winCondition()) {
+            nextTurn(X, map);
+            printField(map);
+            nextTurn(O, map);
+            printField(map);
+//        }
     }
 
     public static char[][] initGame() {
         System.out.println("Let's play a game!");
         System.out.println("Set field size: ");
-        while (!scanner.hasNextInt() & ((SIZE = scanner.nextInt()) > 2)) {
+        while (((SIZE = scanner.nextInt()) < 3)) {
             System.out.println("Only int more 3");
         }
         char[][] map = new char[SIZE][SIZE];
@@ -29,7 +37,9 @@ public class Main {
             for (int j = 0; j < SIZE; j++) {
                 map[i][j] = DOT;
             }
-        }return map;
+        }
+        printField(map);
+        return map;
     }
 
     public static void printField(char[][] map) {
@@ -43,25 +53,27 @@ public class Main {
         System.out.println(sb.toString());
     }
 
-//    public static char nextTurn (char sign, char[][] map) {
-//        System.out.println("Set x and y of your sign:");
-//        int x,y;
-//        do {
-//            x = chooseIndex();
-//            y = chooseIndex();
-//            if (map[x][y] == DOT)
-//                map[x][y] = sign;
-//        }   while (map[x][y] != sign);
-//        return winCondition(sign ,map);
-//    }
+    public static char[][] nextTurn (char sign, char[][] map) {
+        System.out.println("Set " + sign + " of your sign:");
+        int i,j;
+        try {
+            i = scanner.nextInt();
+            j = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            System.out.println("You need input a correct number");
+            scanner.nextLine();
+            return map;
+        }
+        if ((i >= SIZE | i < 0) | (j >= SIZE | j < 0)) {
+            System.out.println("The field size is than allowable, be careful. Next move...");
+            return map;
+        }
+        if (map[i][j] == DOT)
+            map[i][j] = sign;
+        else if (map[i][j] == X || map[i][j] == O) {
+            System.out.println("The field is engaged. Next move...");
+        }
+        return map;
+    }
 
-//    private static boolean isCellValid(int x, int y) {
-//    }
-//
-//    public static int chooseIndex() {
-//        int value = -1;
-//        while (!scanner.hasNextInt() && (value = scanner.nextInt()) < SIZE - 1) {
-//            System.out.println();
-//        }
-//    }
 }
