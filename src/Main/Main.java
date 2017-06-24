@@ -1,11 +1,10 @@
 package Main;
 
-import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
-    enum TYPE_DIAG {
+    enum LINE_TYPE {
         HORZ,
         VERT,
         DIAG
@@ -16,14 +15,21 @@ public class Main {
     protected static final char O = 'O';
     protected static int SIZE = 0;
 
+
     public static void main(String...args) {
         char[][] map = initGame();
-//        while (winCondition()) {
-            nextTurn(X, map);
+        char currentStep = X;   currentStep = (currentStep == X)  ? O : X;
+
+        do {
+            if (isMapFull(map)) {
+                System.out.println("Standoff, no one win!");
+                return;
+            }
+            currentStep = (currentStep == X)  ? O : X;
+            nextTurn(currentStep, map);
             printField(map);
-            nextTurn(O, map);
-            printField(map);
-//        }
+        } while (!winCondition(map, currentStep));
+        System.out.printf("The winner is - %c", currentStep);
     }
 
     public static char[][] initGame() {
@@ -57,8 +63,8 @@ public class Main {
         System.out.println("Set " + sign + " of your sign:");
         int i,j;
         try {
-            i = scanner.nextInt();
-            j = scanner.nextInt();
+            System.out.print("Enter raw - ");i = scanner.nextInt();
+            System.out.print("Enter column - ");j = scanner.nextInt();
         } catch (InputMismatchException e) {
             System.out.println("You need input a correct number");
             scanner.nextLine();
@@ -74,6 +80,79 @@ public class Main {
             System.out.println("The field is engaged. Next move...");
         }
         return map;
+    }
+
+    private static boolean checkLine(LINE_TYPE type, char[][] map, char sign) {
+        switch (type) {
+            case HORZ:
+                for (int i = 0; i < SIZE; i++) {
+                    for (int j = 0; j < SIZE; j++) {
+                        if (map[i][j] == sign) {
+                            if (j == SIZE - 1) {
+                                System.out.println("HORZ");
+                                return true;
+                            }
+                            continue;
+                        } else break;
+                    }
+                }
+                break;
+            case VERT:
+                for (int j = 0; j < SIZE; j++) {
+                    for (int i = 0; i < SIZE; i++) {
+                        if (map[i][j] == sign) {
+                            if (i == SIZE - 1){
+                                System.out.println("VERT");
+                                return true;
+                            }
+                            continue;
+                        } else break;
+                    }
+                }
+                break;
+            case DIAG:
+                if (SIZE % 2 == 1){
+                    // Check major diagonal, and update the boolean if our assumption is wrong.
+                    for(int i=0; i < map.length; i++){
+                        if (map[i][i] == sign) { //(0,0);(1,1);(3,3);...
+                            if (i == map.length - 1){
+                                System.out.println("Major DIAG");
+                                return true;
+                            }
+                            continue;
+                        } else break;
+                    }
+                    // Check minor diagonal, and update the boolean if our assumption is wrong.
+                    for (int k = 0, j = map.length - 1; k < map.length; k++, j--) {
+                        if (map[k][j] == sign) { //(0,7);(1,6);(2,5);...
+                            if (k == map.length - 1) {
+                                System.out.println("Minor DIAG");
+                                return true;
+                            }
+                            continue;
+                        } else break;
+                    }
+
+                }
+                break;
+        }
+        return false;
+    }
+
+    private static boolean winCondition(char[][] map, char sign) {
+        return  checkLine(LINE_TYPE.HORZ, map, sign) |
+                checkLine(LINE_TYPE.VERT, map, sign) |
+                checkLine(LINE_TYPE.DIAG, map, sign);
+
+    }
+
+    public static boolean isMapFull(char[][]map) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (map[i][j] == DOT) return false;
+            }
+        }
+        return true;
     }
 
 }
